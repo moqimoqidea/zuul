@@ -14,7 +14,6 @@
  *      limitations under the License.
  */
 
-
 package com.netflix.zuul.origins;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,7 +36,6 @@ class OriginNameTest {
         assertEquals("woodly-doodly", trusted.getMetricId());
         assertEquals("WOODLY-doodly", trusted.getNiwsClientName());
     }
-
 
     @Test
     void equals() {

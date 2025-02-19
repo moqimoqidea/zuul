@@ -23,7 +23,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,10 +37,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class FilterFileManagerTest {
     @Mock
     private File nonGroovyFile;
+
     @Mock
     private File groovyFile;
+
     @Mock
     private File directory;
+
     @Mock
     private FilterLoader filterLoader;
 
@@ -52,12 +54,8 @@ class FilterFileManagerTest {
 
     @Test
     void testFileManagerInit() throws Exception {
-        FilterFileManager.FilterFileManagerConfig config =
-                new FilterFileManager.FilterFileManagerConfig(
-                        new String[]{"test", "test1"},
-                        new String[]{"com.netflix.blah.SomeFilter"},
-                        1,
-                        (dir, name) -> false);
+        FilterFileManager.FilterFileManagerConfig config = new FilterFileManager.FilterFileManagerConfig(
+                new String[] {"test", "test1"}, new String[] {"com.netflix.blah.SomeFilter"}, 1, (dir, name) -> false);
         FilterFileManager manager = new FilterFileManager(config, filterLoader);
 
         manager = spy(manager);

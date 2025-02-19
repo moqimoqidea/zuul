@@ -20,8 +20,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import com.google.common.net.InetAddresses;
 import com.google.common.truth.Truth;
 import com.netflix.appinfo.InstanceInfo;
@@ -49,6 +54,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 /**
  * Tests for {@link DefaultClientChannelManager}.  These tests don't use IPv6 addresses because {@link InstanceInfo} is
@@ -58,8 +64,11 @@ class DefaultClientChannelManagerTest {
 
     @Test
     void pickAddressInternal_discovery() {
-        InstanceInfo instanceInfo =
-                Builder.newBuilder().setAppName("app").setHostName("192.168.0.1").setPort(443).build();
+        InstanceInfo instanceInfo = Builder.newBuilder()
+                .setAppName("app")
+                .setHostName("192.168.0.1")
+                .setPort(443)
+                .build();
         DiscoveryResult s = DiscoveryResult.from(instanceInfo, true);
 
         SocketAddress addr = DefaultClientChannelManager.pickAddressInternal(s, OriginName.fromVip("vip"));
@@ -72,8 +81,11 @@ class DefaultClientChannelManagerTest {
 
     @Test
     void pickAddressInternal_discovery_unresolved() {
-        InstanceInfo instanceInfo =
-                Builder.newBuilder().setAppName("app").setHostName("localhost").setPort(443).build();
+        InstanceInfo instanceInfo = Builder.newBuilder()
+                .setAppName("app")
+                .setHostName("localhost")
+                .setPort(443)
+                .build();
         DiscoveryResult s = DiscoveryResult.from(instanceInfo, true);
 
         SocketAddress addr = DefaultClientChannelManager.pickAddressInternal(s, OriginName.fromVip("vip"));
@@ -118,13 +130,13 @@ class DefaultClientChannelManagerTest {
 
         when(resolver.resolve(any())).thenReturn(DiscoveryResult.EMPTY);
 
-        final DefaultClientChannelManager clientChannelManager = new DefaultClientChannelManager(originName,
-                clientConfig, resolver, new DefaultRegistry());
+        final DefaultClientChannelManager clientChannelManager =
+                new DefaultClientChannelManager(originName, clientConfig, resolver, new DefaultRegistry());
 
         final AtomicReference<DiscoveryResult> serverRef = new AtomicReference<>();
 
-        final Promise<PooledConnection> promise = clientChannelManager
-                .acquire(new DefaultEventLoop(), null, CurrentPassport.create(), serverRef, new AtomicReference<>());
+        final Promise<PooledConnection> promise = clientChannelManager.acquire(
+                new DefaultEventLoop(), null, CurrentPassport.create(), serverRef, new AtomicReference<>());
 
         Truth.assertThat(promise.isSuccess()).isFalse();
         Truth.assertThat(serverRef.get()).isSameInstanceAs(DiscoveryResult.EMPTY);
@@ -139,19 +151,20 @@ class DefaultClientChannelManagerTest {
         final InstanceInfo instanceInfo = Builder.newBuilder()
                 .setAppName("server-equality")
                 .setHostName("server-equality")
-                .setPort(7777).build();
+                .setPort(7777)
+                .build();
         final DiscoveryResult discoveryResult = DiscoveryResult.from(instanceInfo, false);
 
         when(resolver.resolve(any())).thenReturn(discoveryResult);
 
-        final DefaultClientChannelManager clientChannelManager = new DefaultClientChannelManager(originName,
-                clientConfig, resolver, new DefaultRegistry());
+        final DefaultClientChannelManager clientChannelManager =
+                new DefaultClientChannelManager(originName, clientConfig, resolver, new DefaultRegistry());
 
         final AtomicReference<DiscoveryResult> serverRef = new AtomicReference<>();
 
-        //TODO(argha-c) capture and assert on the promise once we have a dummy with ServerStats initialized
-        clientChannelManager
-                .acquire(new DefaultEventLoop(), null, CurrentPassport.create(), serverRef, new AtomicReference<>());
+        // TODO(argha-c) capture and assert on the promise once we have a dummy with ServerStats initialized
+        clientChannelManager.acquire(
+                new DefaultEventLoop(), null, CurrentPassport.create(), serverRef, new AtomicReference<>());
 
         Truth.assertThat(serverRef.get()).isSameInstanceAs(discoveryResult);
     }
@@ -180,8 +193,8 @@ class DefaultClientChannelManagerTest {
         when(resolver.hasServers()).thenReturn(true);
 
         final Registry registry = new DefaultRegistry();
-        final DefaultClientChannelManager clientChannelManager = new DefaultClientChannelManager(originName,
-                clientConfig, resolver, registry);
+        final DefaultClientChannelManager clientChannelManager =
+                new DefaultClientChannelManager(originName, clientConfig, resolver, registry);
 
         final NioEventLoopGroup eventLoopGroup = new NioEventLoopGroup(10);
         final EventLoop eventLoop = eventLoopGroup.next();
@@ -209,5 +222,60 @@ class DefaultClientChannelManagerTest {
 
         clientChannelManager.shutdown();
         serverSocket.close();
+    }
+
+    @Test
+    void closeOnCircuitBreaker() {
+        final OriginName originName = OriginName.fromVipAndApp("whatever", "whatever");
+        DefaultClientChannelManager manager =
+                new DefaultClientChannelManager(
+                        originName,
+                        new DefaultClientConfigImpl(),
+                        Mockito.mock(DynamicServerResolver.class),
+                        new NoopRegistry()) {
+                    @Override
+                    protected void updateServerStatsOnRelease(PooledConnection conn) {}
+                };
+
+        PooledConnection connection = mock(PooledConnection.class);
+        DiscoveryResult discoveryResult = mock(DiscoveryResult.class);
+        doReturn(discoveryResult).when(connection).getServer();
+        doReturn(true).when(discoveryResult).isCircuitBreakerTripped();
+        doReturn(new EmbeddedChannel()).when(connection).getChannel();
+
+        Truth.assertThat(manager.release(connection)).isFalse();
+        verify(connection).setInPool(false);
+        verify(connection).close();
+    }
+
+    @Test
+    void skipCloseOnCircuitBreaker() {
+        final OriginName originName = OriginName.fromVipAndApp("whatever", "whatever");
+        DefaultClientConfigImpl clientConfig = new DefaultClientConfigImpl();
+        DefaultClientChannelManager manager =
+                new DefaultClientChannelManager(
+                        originName, clientConfig, Mockito.mock(DynamicServerResolver.class), new NoopRegistry()) {
+                    @Override
+                    protected void updateServerStatsOnRelease(PooledConnection conn) {}
+
+                    @Override
+                    protected void releaseHandlers(PooledConnection conn) {}
+                };
+
+        PooledConnection connection = mock(PooledConnection.class);
+        DiscoveryResult discoveryResult = mock(DiscoveryResult.class);
+        doReturn(discoveryResult).when(connection).getServer();
+        doReturn(true).when(discoveryResult).isCircuitBreakerTripped();
+        doReturn(true).when(connection).isActive();
+        doReturn(new EmbeddedChannel()).when(connection).getChannel();
+
+        IConnectionPool connectionPool = mock(IConnectionPool.class);
+        doReturn(true).when(connectionPool).release(connection);
+        manager.getPerServerPools().put(discoveryResult, connectionPool);
+        clientConfig.set(ConnectionPoolConfigImpl.CLOSE_ON_CIRCUIT_BREAKER, false);
+
+        Truth.assertThat(manager.release(connection)).isTrue();
+        verify(connection, never()).setInPool(anyBoolean());
+        verify(connection, never()).close();
     }
 }

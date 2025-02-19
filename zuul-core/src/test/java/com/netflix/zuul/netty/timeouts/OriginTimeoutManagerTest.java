@@ -16,7 +16,6 @@
 
 package com.netflix.zuul.netty.timeouts;
 
-import static com.netflix.zuul.netty.timeouts.OriginTimeoutManager.MAX_OUTBOUND_READ_TIMEOUT_MS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -45,6 +44,7 @@ class OriginTimeoutManagerTest {
 
     @Mock
     private NettyOrigin origin;
+
     @Mock
     private HttpRequestMessage request;
 
@@ -72,7 +72,7 @@ class OriginTimeoutManagerTest {
     void computeReadTimeout_default() {
         Duration timeout = originTimeoutManager.computeReadTimeout(request, 1);
 
-        assertEquals(MAX_OUTBOUND_READ_TIMEOUT_MS.get(), timeout.toMillis());
+        assertEquals(OriginTimeoutManager.MAX_OUTBOUND_READ_TIMEOUT_MS.get(), timeout.toMillis());
     }
 
     @Test
@@ -125,13 +125,15 @@ class OriginTimeoutManagerTest {
 
     @Test
     void computeReadTimeout_bolth_enforceMax() {
-        requestConfig.set(CommonClientConfigKey.ReadTimeout,
-                (int) MAX_OUTBOUND_READ_TIMEOUT_MS.get() + 1000);
-        originConfig.set(CommonClientConfigKey.ReadTimeout,
-                (int) MAX_OUTBOUND_READ_TIMEOUT_MS.get() + 10000);
+        requestConfig.set(
+                CommonClientConfigKey.ReadTimeout,
+                (int) OriginTimeoutManager.MAX_OUTBOUND_READ_TIMEOUT_MS.get() + 1000);
+        originConfig.set(
+                CommonClientConfigKey.ReadTimeout,
+                (int) OriginTimeoutManager.MAX_OUTBOUND_READ_TIMEOUT_MS.get() + 10000);
 
         Duration timeout = originTimeoutManager.computeReadTimeout(request, 1);
 
-        assertEquals(MAX_OUTBOUND_READ_TIMEOUT_MS.get(), timeout.toMillis());
+        assertEquals(OriginTimeoutManager.MAX_OUTBOUND_READ_TIMEOUT_MS.get(), timeout.toMillis());
     }
 }

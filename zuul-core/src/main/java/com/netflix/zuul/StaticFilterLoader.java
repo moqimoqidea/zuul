@@ -19,7 +19,6 @@ package com.netflix.zuul;
 import com.google.errorprone.annotations.DoNotCall;
 import com.netflix.zuul.filters.FilterType;
 import com.netflix.zuul.filters.ZuulFilter;
-import com.netflix.zuul.message.ZuulMessage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -27,10 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -65,8 +61,12 @@ public final class StaticFilterLoader implements FilterLoader {
         for (Class<? extends ZuulFilter<?, ?>> clz : filterTypes) {
             try {
                 ZuulFilter<?, ?> f = filterFactory.newInstance(clz);
-                filtersByType.computeIfAbsent(f.filterType(), k -> new TreeSet<>(FILTER_COMPARATOR)).add(f);
-                filtersByName.computeIfAbsent(f.filterType(), k -> new HashMap<>()).put(f.filterName(), f);
+                filtersByType
+                        .computeIfAbsent(f.filterType(), k -> new TreeSet<>(FILTER_COMPARATOR))
+                        .add(f);
+                filtersByName
+                        .computeIfAbsent(f.filterType(), k -> new HashMap<>())
+                        .put(f.filterName(), f);
             } catch (RuntimeException | Error e) {
                 throw e;
             } catch (Exception e) {
@@ -84,8 +84,7 @@ public final class StaticFilterLoader implements FilterLoader {
         this.filtersByType = Collections.unmodifiableMap(filtersByType);
     }
 
-    public static Set<Class<ZuulFilter<?, ?>>> loadFilterTypesFromResources(ClassLoader loader)
-            throws IOException {
+    public static Set<Class<ZuulFilter<?, ?>>> loadFilterTypesFromResources(ClassLoader loader) throws IOException {
         Set<Class<ZuulFilter<?, ?>>> filterTypes = new LinkedHashSet<>();
         for (URL url : Collections.list(loader.getResources(RESOURCE_NAME))) {
             try (InputStream is = url.openStream();
@@ -113,8 +112,7 @@ public final class StaticFilterLoader implements FilterLoader {
                             continue;
                         }
                         @SuppressWarnings("unchecked")
-                        Class<ZuulFilter<?, ?>> filterClz =
-                                (Class<ZuulFilter<?, ?>>) clz.asSubclass(ZuulFilter.class);
+                        Class<ZuulFilter<?, ?>> filterClz = (Class<ZuulFilter<?, ?>>) clz.asSubclass(ZuulFilter.class);
                         filterTypes.add(filterClz);
                     }
                 }

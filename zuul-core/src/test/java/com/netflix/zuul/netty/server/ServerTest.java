@@ -16,9 +16,11 @@
 
 package com.netflix.zuul.netty.server;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 import com.netflix.config.ConfigurationManager;
@@ -31,7 +33,6 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.GlobalEventExecutor;
-
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -41,7 +42,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.configuration.AbstractConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,12 +78,11 @@ class ServerTest {
         };
         initializers.put(new NamedSocketAddress("test", new InetSocketAddress(0)), init);
         // The port to channel map keys on the port, post bind. This should be unique even if InetAddress is same
-        initializers.put(new NamedSocketAddress("test2", new InetSocketAddress( 0)), init);
-        ClientConnectionsShutdown ccs =
-                new ClientConnectionsShutdown(
-                        new DefaultChannelGroup(GlobalEventExecutor.INSTANCE),
-                        GlobalEventExecutor.INSTANCE,
-                                /* discoveryClient= */ null);
+        initializers.put(new NamedSocketAddress("test2", new InetSocketAddress(0)), init);
+        ClientConnectionsShutdown ccs = new ClientConnectionsShutdown(
+                new DefaultChannelGroup(GlobalEventExecutor.INSTANCE),
+                GlobalEventExecutor.INSTANCE,
+                /* discoveryClient= */ null);
         EventLoopGroupMetrics elgm = new EventLoopGroupMetrics(Spectator.globalRegistry());
         EventLoopConfig elc = new EventLoopConfig() {
             @Override
@@ -107,9 +107,7 @@ class ServerTest {
             checkConnection(port);
         }
 
-        await()
-                .atMost(1, SECONDS)
-                .until(() -> nioChannels.size() == 2);
+        await().atMost(1, TimeUnit.SECONDS).until(() -> nioChannels.size() == 2);
 
         s.stop();
 
@@ -136,8 +134,7 @@ class ServerTest {
         } finally {
             try {
                 sock.close();
-            }
-            catch (Exception ignored) {
+            } catch (Exception ignored) {
             }
         }
     }

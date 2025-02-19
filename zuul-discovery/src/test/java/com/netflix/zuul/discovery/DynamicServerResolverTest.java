@@ -24,12 +24,10 @@ import com.netflix.appinfo.InstanceInfo.Builder;
 import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.niws.loadbalancer.DiscoveryEnabledServer;
 import com.netflix.zuul.resolver.ResolverListener;
-import java.security.cert.TrustAnchor;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class DynamicServerResolverTest {
-
 
     @Test
     void verifyListenerUpdates() {
@@ -49,7 +47,8 @@ class DynamicServerResolverTest {
         }
 
         final CustomListener listener = new CustomListener();
-        final DynamicServerResolver resolver = new DynamicServerResolver(new DefaultClientConfigImpl(), listener);
+        final DynamicServerResolver resolver = new DynamicServerResolver(new DefaultClientConfigImpl());
+        resolver.setListener(listener);
 
         final InstanceInfo first = Builder.newBuilder()
                 .setAppName("zuul-discovery-1")
@@ -68,16 +67,13 @@ class DynamicServerResolverTest {
 
         resolver.onUpdate(ImmutableList.of(server1, server2), ImmutableList.of());
 
-        Truth.assertThat(listener.updatedList()).containsExactly(new DiscoveryResult(server1), new DiscoveryResult(server2));
+        Truth.assertThat(listener.updatedList())
+                .containsExactly(new DiscoveryResult(server1), new DiscoveryResult(server2));
     }
 
     @Test
     void properSentinelValueWhenServersUnavailable() {
-        final DynamicServerResolver resolver = new DynamicServerResolver(new DefaultClientConfigImpl(), new ResolverListener<DiscoveryResult>() {
-            @Override
-            public void onChange(List<DiscoveryResult> removedSet) {
-            }
-        });
+        final DynamicServerResolver resolver = new DynamicServerResolver(new DefaultClientConfigImpl());
 
         final DiscoveryResult nonExistentServer = resolver.resolve(null);
 

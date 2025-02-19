@@ -15,9 +15,10 @@
  */
 package com.netflix.zuul.netty.server.push;
 
-
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.annotation.Nullable;
@@ -36,7 +37,7 @@ public class PushConnectionRegistry {
     private final SecureRandom secureTokenGenerator;
 
     @Inject
-    PushConnectionRegistry() {
+    public PushConnectionRegistry() {
         clientPushConnectionMap = new ConcurrentHashMap<>(1024 * 32);
         secureTokenGenerator = new SecureRandom();
     }
@@ -44,6 +45,10 @@ public class PushConnectionRegistry {
     @Nullable
     public PushConnection get(final String clientId) {
         return clientPushConnectionMap.get(clientId);
+    }
+
+    public List<PushConnection> getAll() {
+        return new ArrayList<>(clientPushConnectionMap.values());
     }
 
     public String mintNewSecureToken() {
@@ -65,5 +70,4 @@ public class PushConnectionRegistry {
     public int size() {
         return clientPushConnectionMap.size();
     }
-
 }

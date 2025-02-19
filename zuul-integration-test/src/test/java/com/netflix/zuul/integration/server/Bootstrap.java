@@ -20,10 +20,9 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.netflix.zuul.netty.server.BaseServerStartup;
 import com.netflix.zuul.netty.server.Server;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.TimeUnit;
 
 public class Bootstrap {
 
@@ -43,8 +42,7 @@ public class Bootstrap {
 
             server.start();
             long startupDuration = System.nanoTime() - startNanos;
-            logger.info(
-                    "Zuul: finished startup. Duration = {}ms", TimeUnit.NANOSECONDS.toMillis(startupDuration));
+            logger.info("Zuul: finished startup. Duration = {}ms", TimeUnit.NANOSECONDS.toMillis(startupDuration));
             // server.awaitTermination();
         } catch (Throwable t) {
             exitCode = 1;

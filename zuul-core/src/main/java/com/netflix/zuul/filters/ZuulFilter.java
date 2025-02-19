@@ -23,14 +23,13 @@ import io.netty.handler.codec.http.HttpContent;
 import rx.Observable;
 
 /**
- * BAse interface for ZuulFilters
+ * Base interface for ZuulFilters
  *
  * @author Mikey Cohen
  *         Date: 10/27/11
  *         Time: 3:03 PM
  */
-public interface ZuulFilter<I extends ZuulMessage, O extends ZuulMessage> extends ShouldFilter<I>
-{
+public interface ZuulFilter<I extends ZuulMessage, O extends ZuulMessage> extends ShouldFilter<I> {
     boolean isDisabled();
 
     String filterName();
@@ -72,8 +71,9 @@ public interface ZuulFilter<I extends ZuulMessage, O extends ZuulMessage> extend
         Filter f = getClass().getAnnotation(Filter.class);
         if (f != null) {
             return f.category();
+        } else {
+            return FilterCategory.UNSPECIFIED;
         }
-        throw new UnsupportedOperationException("not implemented");
     }
 
     /**
@@ -128,4 +128,5 @@ public interface ZuulFilter<I extends ZuulMessage, O extends ZuulMessage> extend
     /**
      * Optionally transform HTTP content chunk received.
      */
-    HttpContent processContentChunk(ZuulMessage zuulMessage, HttpContent chunk);}
+    HttpContent processContentChunk(ZuulMessage zuulMessage, HttpContent chunk);
+}

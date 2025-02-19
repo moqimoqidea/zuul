@@ -121,7 +121,8 @@ public final class SocketAddressProperty extends StringDerivedProperty<SocketAdd
             BindType bindType = BindType.valueOf(rawBindType.toUpperCase(Locale.ROOT));
             String rawAddress = input.substring(equalsPosition + 1);
             int port;
-            parsePort: {
+            parsePort:
+            {
                 switch (bindType) {
                     case ANY: // fallthrough
                     case IPV4_ANY: // fallthrough
@@ -155,11 +156,6 @@ public final class SocketAddressProperty extends StringDerivedProperty<SocketAdd
                     return new DomainSocketAddress(rawAddress);
             }
             throw new AssertionError("Missed cased: " + bindType);
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            return false;
         }
     }
 

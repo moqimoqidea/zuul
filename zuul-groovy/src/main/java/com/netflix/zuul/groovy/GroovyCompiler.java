@@ -37,8 +37,8 @@ public class GroovyCompiler implements DynamicCodeCompiler {
 
     /**
      * Compiles Groovy code and returns the Class of the compiles code.
-     *
      */
+    @Override
     public Class<?> compile(String sCode, String sName) {
         GroovyClassLoader loader = getGroovyClassLoader();
         LOG.warn("Compiling filter: {}", sName);
@@ -49,18 +49,18 @@ public class GroovyCompiler implements DynamicCodeCompiler {
     /**
      * @return a new GroovyClassLoader
      */
+    @SuppressWarnings("BanClassLoader")
     GroovyClassLoader getGroovyClassLoader() {
         return new GroovyClassLoader();
     }
 
     /**
      * Compiles groovy class from a file
-     *
      */
+    @Override
     public Class<?> compile(File file) throws IOException {
         GroovyClassLoader loader = getGroovyClassLoader();
         Class<?> groovyClass = loader.parseClass(file);
         return groovyClass;
     }
 }
-

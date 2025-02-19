@@ -42,11 +42,13 @@ public final class DiscoveryResult implements ResolverResult {
      * This exists to allow for a semblance of type safety, and encourages avoiding null checks on the underlying Server,
      * thus representing a sentinel value for an empty resolution result.
      */
-    public static final DiscoveryResult EMPTY =
-            DiscoveryResult.from(InstanceInfo.Builder.newBuilder()
-                                .setAppName("undefined")
-                                .setHostName("undefined")
-                                .setPort(-1).build(), false);
+    public static final DiscoveryResult EMPTY = DiscoveryResult.from(
+            InstanceInfo.Builder.newBuilder()
+                    .setAppName("undefined")
+                    .setHostName("undefined")
+                    .setPort(-1)
+                    .build(),
+            false);
 
     public DiscoveryResult(DiscoveryEnabledServer server, LoadBalancerStats lbStats) {
         this.server = server;
@@ -55,18 +57,22 @@ public final class DiscoveryResult implements ResolverResult {
     }
 
     /**
-     *
      * This solely exists to create a result object from incomplete InstanceInfo.
      * Usage of this for production code is strongly discouraged, since the underlying instances are prone to memory leaks
      */
     public DiscoveryResult(DiscoveryEnabledServer server) {
         this.server = server;
-        this.serverStats = new ServerStats();
+        this.serverStats = new ServerStats() {
+            @Override
+            public String toString() {
+                return "no stats configured for server";
+            }
+        };
     }
 
     /**
-     *
      * This convenience method exists for usage in tests. For production usage, please use the constructor linked:
+     *
      * @see DiscoveryResult#DiscoveryResult(DiscoveryEnabledServer, LoadBalancerStats)
      */
     @VisibleForTesting
@@ -121,7 +127,6 @@ public final class DiscoveryResult implements ResolverResult {
         }
     }
 
-
     public SimpleMetaInfo getMetaInfo() {
         return new SimpleMetaInfo(server.getMetaInfo());
     }
@@ -148,7 +153,7 @@ public final class DiscoveryResult implements ResolverResult {
     }
 
     @VisibleForTesting
-    ServerStats getServerStats(){
+    ServerStats getServerStats() {
         return this.serverStats;
     }
 
@@ -221,7 +226,6 @@ public final class DiscoveryResult implements ResolverResult {
         return Objects.hashCode(server);
     }
 
-
     /**
      * Two instances are deemed identical if they wrap the same underlying discovery server instance.
      */
@@ -237,5 +241,4 @@ public final class DiscoveryResult implements ResolverResult {
         final DiscoveryResult other = (DiscoveryResult) obj;
         return server.equals(other.server);
     }
-
 }

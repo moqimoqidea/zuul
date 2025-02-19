@@ -80,6 +80,4 @@ class PushConnectionTest {
         assertFalse(conn.isRateLimited());
         assertTrue(conn.isRateLimited());
     }
-
-
 }

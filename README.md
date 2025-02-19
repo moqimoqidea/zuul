@@ -1,8 +1,9 @@
+[![Snapshot](https://github.com/Netflix/zuul/actions/workflows/snapshot.yml/badge.svg)](https://github.com/Netflix/zuul/actions/workflows/snapshot.yml)
+
 # Zuul
 
 <img src="https://i.imgur.com/mRSosEp.png" width=500/>
 
-[![Build Status](https://travis-ci.org/Netflix/zuul.svg)](https://travis-ci.org/Netflix/zuul/builds)
 
 Zuul is an L7 application gateway that provides capabilities for dynamic routing, monitoring, resiliency, security, and more.
 Please view the wiki for usage, information, HOWTO, etc https://github.com/Netflix/zuul/wiki
@@ -74,3 +75,16 @@ https://engineering.riotgames.com/news/riot-games-api-deep-dive
 http://instea.sk/2015/04/netflix-zuul-vs-nginx-performance/
 
 ---
+
+
+# How to release Zuul
+
+This project uses a GitHub Action workflow for publishing a new release.
+The workflow is triggered by a Git tag.
+
+```
+git checkout master
+git tag vX.Y.Z
+git push --tags
+```
+

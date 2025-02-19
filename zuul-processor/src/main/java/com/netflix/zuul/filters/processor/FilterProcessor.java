@@ -48,7 +48,6 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 
-
 @SupportedAnnotationTypes(FilterProcessor.FILTER_TYPE)
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public final class FilterProcessor extends AbstractProcessor {
@@ -59,13 +58,16 @@ public final class FilterProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        Set<? extends Element> annotated =
-                roundEnv.getElementsAnnotatedWith(processingEnv.getElementUtils().getTypeElement(FILTER_TYPE));
+        Set<? extends Element> annotated = roundEnv.getElementsAnnotatedWith(
+                processingEnv.getElementUtils().getTypeElement(FILTER_TYPE));
         for (Element el : annotated) {
             if (el.getModifiers().contains(Modifier.ABSTRACT)) {
                 continue;
             }
-            annotatedElements.add(processingEnv.getElementUtils().getBinaryName((TypeElement) el).toString());
+            annotatedElements.add(processingEnv
+                    .getElementUtils()
+                    .getBinaryName((TypeElement) el)
+                    .toString());
         }
 
         if (roundEnv.processingOver()) {

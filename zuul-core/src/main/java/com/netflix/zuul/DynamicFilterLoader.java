@@ -51,9 +51,7 @@ public final class DynamicFilterLoader implements FilterLoader {
 
     @Inject
     public DynamicFilterLoader(
-            FilterRegistry filterRegistry,
-            DynamicCodeCompiler compiler,
-            FilterFactory filterFactory) {
+            FilterRegistry filterRegistry, DynamicCodeCompiler compiler, FilterFactory filterFactory) {
         this.filterRegistry = filterRegistry;
         this.compiler = compiler;
         this.filterFactory = filterFactory;
@@ -141,7 +139,7 @@ public final class DynamicFilterLoader implements FilterLoader {
         }
         SortedSet<ZuulFilter<?, ?>> set = hashFiltersByType.get(filter.filterType());
         if (set != null) {
-            hashFiltersByType.remove(filter.filterType()); //rebuild this list
+            hashFiltersByType.remove(filter.filterType()); // rebuild this list
         }
 
         String nameAndType = filter.filterType() + ":" + filter.filterName();
@@ -186,7 +184,9 @@ public final class DynamicFilterLoader implements FilterLoader {
     @Override
     public SortedSet<ZuulFilter<?, ?>> getFiltersByType(FilterType filterType) {
         SortedSet<ZuulFilter<?, ?>> set = hashFiltersByType.get(filterType);
-        if (set != null) return set;
+        if (set != null) {
+            return set;
+        }
 
         set = new TreeSet<>(FILTER_COMPARATOR);
 

@@ -40,6 +40,11 @@ class DiscoveryResultTest {
     }
 
     @Test
+    void serverStatsForEmptySentinel() {
+        Truth.assertThat(DiscoveryResult.EMPTY.getServerStats().toString()).isEqualTo("no stats configured for server");
+    }
+
+    @Test
     void hostAndPortForNullServer() {
         final DiscoveryResult discoveryResult = new DiscoveryResult(null);
 
@@ -52,11 +57,13 @@ class DiscoveryResultTest {
         final InstanceInfo instanceInfo = Builder.newBuilder()
                 .setAppName("serverstats-cache")
                 .setHostName("serverstats-cache")
-                .setPort(7777).build();
+                .setPort(7777)
+                .build();
         final DiscoveryEnabledServer server = new DiscoveryEnabledServer(instanceInfo, false);
         final DiscoveryEnabledServer serverSecure = new DiscoveryEnabledServer(instanceInfo, true);
 
-        final DynamicServerListLoadBalancer<Server> lb = new DynamicServerListLoadBalancer<>(new DefaultClientConfigImpl());
+        final DynamicServerListLoadBalancer<Server> lb =
+                new DynamicServerListLoadBalancer<>(new DefaultClientConfigImpl());
 
         final DiscoveryResult result = new DiscoveryResult(server, lb.getLoadBalancerStats());
         final DiscoveryResult result1 = new DiscoveryResult(serverSecure, lb.getLoadBalancerStats());
@@ -69,15 +76,18 @@ class DiscoveryResultTest {
         final InstanceInfo instanceInfo = Builder.newBuilder()
                 .setAppName("serverstats-cache")
                 .setHostName("serverstats-cache")
-                .setPort(7777).build();
+                .setPort(7777)
+                .build();
         final InstanceInfo otherInstance = Builder.newBuilder()
                 .setAppName("serverstats-cache-2")
                 .setHostName("serverstats-cache-2")
-                .setPort(7777).build();
+                .setPort(7777)
+                .build();
         final DiscoveryEnabledServer server = new DiscoveryEnabledServer(instanceInfo, false);
         final DiscoveryEnabledServer serverSecure = new DiscoveryEnabledServer(otherInstance, false);
 
-        final DynamicServerListLoadBalancer<Server> lb = new DynamicServerListLoadBalancer<>(new DefaultClientConfigImpl());
+        final DynamicServerListLoadBalancer<Server> lb =
+                new DynamicServerListLoadBalancer<>(new DefaultClientConfigImpl());
 
         final DiscoveryResult result = new DiscoveryResult(server, lb.getLoadBalancerStats());
         final DiscoveryResult result1 = new DiscoveryResult(serverSecure, lb.getLoadBalancerStats());
@@ -92,10 +102,12 @@ class DiscoveryResultTest {
                 .setAppName("ipAddrv4")
                 .setHostName("ipAddrv4")
                 .setIPAddr(ipAddr)
-                .setPort(7777).build();
+                .setPort(7777)
+                .build();
 
         final DiscoveryEnabledServer server = new DiscoveryEnabledServer(instanceInfo, false);
-        final DynamicServerListLoadBalancer<Server> lb = new DynamicServerListLoadBalancer<>(new DefaultClientConfigImpl());
+        final DynamicServerListLoadBalancer<Server> lb =
+                new DynamicServerListLoadBalancer<>(new DefaultClientConfigImpl());
         final DiscoveryResult result = new DiscoveryResult(server, lb.getLoadBalancerStats());
 
         Truth.assertThat(result.getIPAddr()).isEqualTo(Optional.of(ipAddr));
@@ -106,10 +118,12 @@ class DiscoveryResultTest {
         final InstanceInfo instanceInfo = Builder.newBuilder()
                 .setAppName("ipAddrMissing")
                 .setHostName("ipAddrMissing")
-                .setPort(7777).build();
+                .setPort(7777)
+                .build();
 
         final DiscoveryEnabledServer server = new DiscoveryEnabledServer(instanceInfo, false);
-        final DynamicServerListLoadBalancer<Server> lb = new DynamicServerListLoadBalancer<>(new DefaultClientConfigImpl());
+        final DynamicServerListLoadBalancer<Server> lb =
+                new DynamicServerListLoadBalancer<>(new DefaultClientConfigImpl());
         final DiscoveryResult result = new DiscoveryResult(server, lb.getLoadBalancerStats());
 
         Truth.assertThat(result.getIPAddr()).isEqualTo(Optional.empty());
@@ -120,12 +134,14 @@ class DiscoveryResultTest {
         final InstanceInfo instanceInfo = Builder.newBuilder()
                 .setAppName("server-equality")
                 .setHostName("server-equality")
-                .setPort(7777).build();
+                .setPort(7777)
+                .build();
 
         final DiscoveryEnabledServer server = new DiscoveryEnabledServer(instanceInfo, false);
         final DiscoveryEnabledServer otherServer = new DiscoveryEnabledServer(instanceInfo, false);
 
-        final DynamicServerListLoadBalancer<Server> lb = new DynamicServerListLoadBalancer<>(new DefaultClientConfigImpl());
+        final DynamicServerListLoadBalancer<Server> lb =
+                new DynamicServerListLoadBalancer<>(new DefaultClientConfigImpl());
 
         final DiscoveryResult result = new DiscoveryResult(server, lb.getLoadBalancerStats());
         final DiscoveryResult otherResult = new DiscoveryResult(otherServer, lb.getLoadBalancerStats());
@@ -138,16 +154,19 @@ class DiscoveryResultTest {
         final InstanceInfo instanceInfo = Builder.newBuilder()
                 .setAppName("server-equality")
                 .setHostName("server-equality")
-                .setPort(7777).build();
+                .setPort(7777)
+                .build();
         final InstanceInfo otherPort = Builder.newBuilder()
                 .setAppName("server-equality")
                 .setHostName("server-equality")
-                .setPort(9999).build();
+                .setPort(9999)
+                .build();
 
         final DiscoveryEnabledServer server = new DiscoveryEnabledServer(instanceInfo, false);
-        final DiscoveryEnabledServer otherServer  = new DiscoveryEnabledServer(otherPort, false);
+        final DiscoveryEnabledServer otherServer = new DiscoveryEnabledServer(otherPort, false);
 
-        final DynamicServerListLoadBalancer<Server> lb = new DynamicServerListLoadBalancer<>(new DefaultClientConfigImpl());
+        final DynamicServerListLoadBalancer<Server> lb =
+                new DynamicServerListLoadBalancer<>(new DefaultClientConfigImpl());
 
         final DiscoveryResult result = new DiscoveryResult(server, lb.getLoadBalancerStats());
         final DiscoveryResult otherResult = new DiscoveryResult(otherServer, lb.getLoadBalancerStats());
@@ -172,7 +191,8 @@ class DiscoveryResultTest {
 
         final DiscoveryEnabledServer server = new DiscoveryEnabledServer(instanceInfo, true);
         final DiscoveryEnabledServer secureServer = new DiscoveryEnabledServer(secureEnabled, true);
-        final DynamicServerListLoadBalancer<Server> lb = new DynamicServerListLoadBalancer<>(new DefaultClientConfigImpl());
+        final DynamicServerListLoadBalancer<Server> lb =
+                new DynamicServerListLoadBalancer<>(new DefaultClientConfigImpl());
 
         final DiscoveryResult result = new DiscoveryResult(server, lb.getLoadBalancerStats());
         final DiscoveryResult secure = new DiscoveryResult(secureServer, lb.getLoadBalancerStats());

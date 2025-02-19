@@ -34,12 +34,13 @@ class FilterProcessorTest {
         Collection<Class<ZuulFilter<?, ?>>> filters =
                 StaticFilterLoader.loadFilterTypesFromResources(getClass().getClassLoader());
 
-        Truth.assertThat(filters).containsExactly(
-                OuterClassFilter.class,
-                TopLevelFilter.class,
-                TopLevelFilter.StaticSubclassFilter.class,
-                TopLevelFilter.SubclassFilter.class,
-                OverrideFilter.class,
-                SubpackageFilter.class);
+        Truth.assertThat(filters)
+                .containsExactly(
+                        OuterClassFilter.class,
+                        TopLevelFilter.class,
+                        TopLevelFilter.StaticSubclassFilter.class,
+                        TopLevelFilter.SubclassFilter.class,
+                        OverrideFilter.class,
+                        SubpackageFilter.class);
     }
 }

@@ -33,9 +33,8 @@ class StaticFilterLoaderTest {
 
     @Test
     void getFiltersByType() {
-        StaticFilterLoader filterLoader =
-                new StaticFilterLoader(factory,
-                        ImmutableSet.of(DummyFilter2.class, DummyFilter1.class, DummyFilter22.class));
+        StaticFilterLoader filterLoader = new StaticFilterLoader(
+                factory, ImmutableSet.of(DummyFilter2.class, DummyFilter1.class, DummyFilter22.class));
 
         SortedSet<ZuulFilter<?, ?>> filters = filterLoader.getFiltersByType(FilterType.INBOUND);
         Truth.assertThat(filters).hasSize(3);

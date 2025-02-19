@@ -16,17 +16,18 @@
 
 package com.netflix.zuul.message.http;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.netflix.zuul.context.SessionContext;
 import com.netflix.zuul.message.Headers;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.nio.charset.StandardCharsets;
 
 /**
  * Unit tests for {@link HttpResponseMessageImpl}.
@@ -48,8 +49,14 @@ class HttpResponseMessageImplTest {
 
     @Test
     void testHasSetCookieWithName() {
-        response.getHeaders().add("Set-Cookie", "c1=1234; Max-Age=-1; Expires=Tue, 01 Sep 2015 22:49:57 GMT; Path=/; Domain=.netflix.com");
-        response.getHeaders().add("Set-Cookie", "c2=4567; Max-Age=-1; Expires=Tue, 01 Sep 2015 22:49:57 GMT; Path=/; Domain=.netflix.com");
+        response.getHeaders()
+                .add(
+                        "Set-Cookie",
+                        "c1=1234; Max-Age=-1; Expires=Tue, 01 Sep 2015 22:49:57 GMT; Path=/; Domain=.netflix.com");
+        response.getHeaders()
+                .add(
+                        "Set-Cookie",
+                        "c2=4567; Max-Age=-1; Expires=Tue, 01 Sep 2015 22:49:57 GMT; Path=/; Domain=.netflix.com");
 
         assertTrue(response.hasSetCookieWithName("c1"));
         assertTrue(response.hasSetCookieWithName("c2"));
@@ -58,8 +65,14 @@ class HttpResponseMessageImplTest {
 
     @Test
     void testRemoveExistingSetCookie() {
-        response.getHeaders().add("Set-Cookie", "c1=1234; Max-Age=-1; Expires=Tue, 01 Sep 2015 22:49:57 GMT; Path=/; Domain=.netflix.com");
-        response.getHeaders().add("Set-Cookie", "c2=4567; Max-Age=-1; Expires=Tue, 01 Sep 2015 22:49:57 GMT; Path=/; Domain=.netflix.com");
+        response.getHeaders()
+                .add(
+                        "Set-Cookie",
+                        "c1=1234; Max-Age=-1; Expires=Tue, 01 Sep 2015 22:49:57 GMT; Path=/; Domain=.netflix.com");
+        response.getHeaders()
+                .add(
+                        "Set-Cookie",
+                        "c2=4567; Max-Age=-1; Expires=Tue, 01 Sep 2015 22:49:57 GMT; Path=/; Domain=.netflix.com");
 
         response.removeExistingSetCookie("c1");
 

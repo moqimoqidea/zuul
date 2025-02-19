@@ -31,7 +31,14 @@ import com.netflix.zuul.FilterLoader;
 import com.netflix.zuul.FilterUsageNotifier;
 import com.netflix.zuul.RequestCompleteHandler;
 import com.netflix.zuul.context.SessionContextDecorator;
-import com.netflix.zuul.netty.server.*;
+import com.netflix.zuul.netty.server.BaseServerStartup;
+import com.netflix.zuul.netty.server.DefaultEventLoopConfig;
+import com.netflix.zuul.netty.server.DirectMemoryMonitor;
+import com.netflix.zuul.netty.server.Http1MutualSslChannelInitializer;
+import com.netflix.zuul.netty.server.NamedSocketAddress;
+import com.netflix.zuul.netty.server.SocketAddressProperty;
+import com.netflix.zuul.netty.server.ZuulDependencyKeys;
+import com.netflix.zuul.netty.server.ZuulServerChannelInitializer;
 import com.netflix.zuul.netty.server.http2.Http2SslChannelInitializer;
 import com.netflix.zuul.netty.server.push.PushConnectionRegistry;
 import com.netflix.zuul.netty.ssl.BaseSslContextFactory;
@@ -41,15 +48,14 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.compression.CompressionOptions;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.ssl.ClientAuth;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 @Singleton
 public class ServerStartup extends BaseServerStartup {
@@ -62,20 +68,37 @@ public class ServerStartup extends BaseServerStartup {
         SSE
     }
 
-    private static final String[] WWW_PROTOCOLS = new String[]{"TLSv1.3", "TLSv1.2", "TLSv1.1", "TLSv1", "SSLv3"};
+    private static final String[] WWW_PROTOCOLS = new String[] {"TLSv1.3", "TLSv1.2", "TLSv1.1", "TLSv1", "SSLv3"};
     private static final ServerType SERVER_TYPE = ServerType.HTTP;
     private final PushConnectionRegistry pushConnectionRegistry;
-//    private final SamplePushMessageSenderInitializer pushSenderInitializer;
+    //    private final SamplePushMessageSenderInitializer pushSenderInitializer;
 
     @Inject
-    public ServerStartup(ServerStatusManager serverStatusManager, FilterLoader filterLoader,
-                         SessionContextDecorator sessionCtxDecorator, FilterUsageNotifier usageNotifier,
-                         RequestCompleteHandler reqCompleteHandler, Registry registry,
-                         DirectMemoryMonitor directMemoryMonitor, EventLoopGroupMetrics eventLoopGroupMetrics,
-                         EurekaClient discoveryClient, ApplicationInfoManager applicationInfoManager,
-                         AccessLogPublisher accessLogPublisher, PushConnectionRegistry pushConnectionRegistry) {
-        super(serverStatusManager, filterLoader, sessionCtxDecorator, usageNotifier, reqCompleteHandler, registry,
-                directMemoryMonitor, eventLoopGroupMetrics, discoveryClient, applicationInfoManager,
+    public ServerStartup(
+            ServerStatusManager serverStatusManager,
+            FilterLoader filterLoader,
+            SessionContextDecorator sessionCtxDecorator,
+            FilterUsageNotifier usageNotifier,
+            RequestCompleteHandler reqCompleteHandler,
+            Registry registry,
+            DirectMemoryMonitor directMemoryMonitor,
+            EventLoopGroupMetrics eventLoopGroupMetrics,
+            EurekaClient discoveryClient,
+            ApplicationInfoManager applicationInfoManager,
+            AccessLogPublisher accessLogPublisher,
+            PushConnectionRegistry pushConnectionRegistry) {
+        super(
+                serverStatusManager,
+                filterLoader,
+                sessionCtxDecorator,
+                usageNotifier,
+                reqCompleteHandler,
+                registry,
+                directMemoryMonitor,
+                eventLoopGroupMetrics,
+                new DefaultEventLoopConfig(),
+                discoveryClient,
+                applicationInfoManager,
                 accessLogPublisher);
         this.pushConnectionRegistry = pushConnectionRegistry;
         // this.pushSenderInitializer = pushSenderInitializer;
@@ -87,8 +110,7 @@ public class ServerStartup extends BaseServerStartup {
         SocketAddress sockAddr;
         String metricId;
         {
-            @Deprecated
-            int port = new DynamicIntProperty("zuul.server.port.main", 7001).get();
+            @Deprecated int port = new DynamicIntProperty("zuul.server.port.main", 7001).get();
             sockAddr = new SocketAddressProperty("zuul.server.addr.main", "=" + port).getValue();
             if (sockAddr instanceof InetSocketAddress) {
                 metricId = String.valueOf(((InetSocketAddress) sockAddr).getPort());
@@ -101,8 +123,7 @@ public class ServerStartup extends BaseServerStartup {
         SocketAddress pushSockAddr;
         {
             int pushPort = new DynamicIntProperty("zuul.server.port.http.push", 7008).get();
-            pushSockAddr = new SocketAddressProperty(
-                    "zuul.server.addr.http.push", "="  + pushPort).getValue();
+            pushSockAddr = new SocketAddressProperty("zuul.server.addr.http.push", "=" + pushPort).getValue();
         }
 
         String mainListenAddressName = "main";
@@ -118,18 +139,18 @@ public class ServerStartup extends BaseServerStartup {
              * and passes XFF headers.
              */
             case HTTP:
-                channelConfig.set(CommonChannelConfigKeys.allowProxyHeadersWhen, StripUntrustedProxyHeadersHandler.AllowWhen.ALWAYS);
+                channelConfig.set(
+                        CommonChannelConfigKeys.allowProxyHeadersWhen,
+                        StripUntrustedProxyHeadersHandler.AllowWhen.ALWAYS);
                 channelConfig.set(CommonChannelConfigKeys.preferProxyProtocolForClientIp, false);
                 channelConfig.set(CommonChannelConfigKeys.isSSlFromIntermediary, false);
                 channelConfig.set(CommonChannelConfigKeys.withProxyProtocol, false);
 
                 addrsToChannels.put(
                         new NamedSocketAddress("http", sockAddr),
-                        new ZuulServerChannelInitializer(
-                                metricId, channelConfig, channelDependencies, clientChannels) {
+                        new ZuulServerChannelInitializer(metricId, channelConfig, channelDependencies, clientChannels) {
                             @Override
-                            protected void addHttp1Handlers(ChannelPipeline pipeline)
-                            {
+                            protected void addHttp1Handlers(ChannelPipeline pipeline) {
                                 super.addHttp1Handlers(pipeline);
                                 pipeline.addLast(new HttpContentCompressor((CompressionOptions[]) null));
                             }
@@ -142,22 +163,22 @@ public class ServerStartup extends BaseServerStartup {
              */
             case HTTP2:
                 sslConfig = ServerSslConfig.withDefaultCiphers(
-                        loadFromResources("server.cert"),
-                        loadFromResources("server.key"),
-                        WWW_PROTOCOLS);
+                        loadFromResources("server.cert"), loadFromResources("server.key"), WWW_PROTOCOLS);
 
-                channelConfig.set(CommonChannelConfigKeys.allowProxyHeadersWhen, StripUntrustedProxyHeadersHandler.AllowWhen.NEVER);
+                channelConfig.set(
+                        CommonChannelConfigKeys.allowProxyHeadersWhen,
+                        StripUntrustedProxyHeadersHandler.AllowWhen.NEVER);
                 channelConfig.set(CommonChannelConfigKeys.preferProxyProtocolForClientIp, true);
                 channelConfig.set(CommonChannelConfigKeys.isSSlFromIntermediary, false);
                 channelConfig.set(CommonChannelConfigKeys.serverSslConfig, sslConfig);
-                channelConfig.set(CommonChannelConfigKeys.sslContextFactory, new BaseSslContextFactory(registry, sslConfig));
+                channelConfig.set(
+                        CommonChannelConfigKeys.sslContextFactory, new BaseSslContextFactory(registry, sslConfig));
 
                 addHttp2DefaultConfig(channelConfig, mainListenAddressName);
 
                 addrsToChannels.put(
                         new NamedSocketAddress("http2", sockAddr),
-                        new Http2SslChannelInitializer(
-                                metricId, channelConfig, channelDependencies, clientChannels));
+                        new Http2SslChannelInitializer(metricId, channelConfig, channelDependencies, clientChannels));
                 logAddrConfigured(sockAddr, sslConfig);
                 break;
 
@@ -178,12 +199,15 @@ public class ServerStartup extends BaseServerStartup {
                         loadFromResources("truststore.key"),
                         false);
 
-                channelConfig.set(CommonChannelConfigKeys.allowProxyHeadersWhen, StripUntrustedProxyHeadersHandler.AllowWhen.NEVER);
+                channelConfig.set(
+                        CommonChannelConfigKeys.allowProxyHeadersWhen,
+                        StripUntrustedProxyHeadersHandler.AllowWhen.NEVER);
                 channelConfig.set(CommonChannelConfigKeys.preferProxyProtocolForClientIp, true);
                 channelConfig.set(CommonChannelConfigKeys.isSSlFromIntermediary, false);
                 channelConfig.set(CommonChannelConfigKeys.withProxyProtocol, true);
                 channelConfig.set(CommonChannelConfigKeys.serverSslConfig, sslConfig);
-                channelConfig.set(CommonChannelConfigKeys.sslContextFactory, new BaseSslContextFactory(registry, sslConfig));
+                channelConfig.set(
+                        CommonChannelConfigKeys.sslContextFactory, new BaseSslContextFactory(registry, sslConfig));
 
                 addrsToChannels.put(
                         new NamedSocketAddress("http_mtls", sockAddr),
@@ -195,7 +219,9 @@ public class ServerStartup extends BaseServerStartup {
             /* Settings to be used when running behind an ELB TCP listener with proxy protocol as a Push notification
              * server using WebSockets */
             case WEBSOCKET:
-                channelConfig.set(CommonChannelConfigKeys.allowProxyHeadersWhen, StripUntrustedProxyHeadersHandler.AllowWhen.NEVER);
+                channelConfig.set(
+                        CommonChannelConfigKeys.allowProxyHeadersWhen,
+                        StripUntrustedProxyHeadersHandler.AllowWhen.NEVER);
                 channelConfig.set(CommonChannelConfigKeys.preferProxyProtocolForClientIp, true);
                 channelConfig.set(CommonChannelConfigKeys.isSSlFromIntermediary, false);
                 channelConfig.set(CommonChannelConfigKeys.withProxyProtocol, true);
@@ -217,13 +243,14 @@ public class ServerStartup extends BaseServerStartup {
             /* Settings to be used when running behind an ELB TCP listener with proxy protocol as a Push notification
              * server using Server Sent Events (SSE) */
             case SSE:
-                channelConfig.set(CommonChannelConfigKeys.allowProxyHeadersWhen, StripUntrustedProxyHeadersHandler.AllowWhen.NEVER);
+                channelConfig.set(
+                        CommonChannelConfigKeys.allowProxyHeadersWhen,
+                        StripUntrustedProxyHeadersHandler.AllowWhen.NEVER);
                 channelConfig.set(CommonChannelConfigKeys.preferProxyProtocolForClientIp, true);
                 channelConfig.set(CommonChannelConfigKeys.isSSlFromIntermediary, false);
                 channelConfig.set(CommonChannelConfigKeys.withProxyProtocol, true);
 
                 channelDependencies.set(ZuulDependencyKeys.pushConnectionRegistry, pushConnectionRegistry);
-
 
                 /*
                 addrsToChannels.put(

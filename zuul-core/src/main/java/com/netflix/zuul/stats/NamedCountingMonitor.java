@@ -20,7 +20,6 @@ import com.netflix.spectator.api.Spectator;
 import com.netflix.spectator.api.patterns.PolledMeter;
 import com.netflix.zuul.stats.monitoring.MonitorRegistry;
 import com.netflix.zuul.stats.monitoring.NamedCount;
-
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -29,7 +28,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author mhawthorne
  */
 public class NamedCountingMonitor implements NamedCount {
-
 
     private final String name;
 
@@ -66,8 +64,8 @@ public class NamedCountingMonitor implements NamedCount {
     /**
      * @return the current count
      */
+    @Override
     public long getCount() {
         return this.count.get();
     }
-
 }

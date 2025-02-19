@@ -16,15 +16,14 @@
 
 package com.netflix.zuul.netty.server.ssl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
@@ -46,8 +45,8 @@ class SslHandshakeInfoHandlerTest {
 
         EmbeddedChannel serverChannel = new EmbeddedChannel();
         SelfSignedCertificate cert = new SelfSignedCertificate("localhorse");
-        SSLEngine serverEngine = SslContextBuilder.forServer(cert.key(), cert.cert()).build()
-                .newEngine(serverChannel.alloc());
+        SSLEngine serverEngine =
+                SslContextBuilder.forServer(cert.key(), cert.cert()).build().newEngine(serverChannel.alloc());
 
         serverChannel.pipeline().addLast(new ChannelOutboundHandlerAdapter() {
             @Override
@@ -68,5 +67,21 @@ class SslHandshakeInfoHandlerTest {
 
         // Assert that the handler removes itself from the pipeline, since it was torn down.
         assertNull(serverChannel.pipeline().context(SslHandshakeInfoHandler.class));
+    }
+
+    @Test
+    void getFailureCauses() {
+        SslHandshakeInfoHandler handler = new SslHandshakeInfoHandler();
+
+        RuntimeException noMessage = new RuntimeException();
+        assertEquals(noMessage.toString(), handler.getFailureCause(noMessage));
+
+        RuntimeException withMessage = new RuntimeException("some unexpected message");
+        assertEquals("some unexpected message", handler.getFailureCause(withMessage));
+
+        RuntimeException openSslMessage = new RuntimeException(
+                "javax.net.ssl.SSLHandshakeException: error:1000008e:SSL routines:OPENSSL_internal:DIGEST_CHECK_FAILED");
+
+        assertEquals("DIGEST_CHECK_FAILED", handler.getFailureCause(openSslMessage));
     }
 }

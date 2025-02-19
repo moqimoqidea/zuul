@@ -17,7 +17,10 @@
 package com.netflix.zuul.util;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.netflix.zuul.context.SessionContext;
 import com.netflix.zuul.message.Headers;
@@ -103,7 +106,8 @@ class HttpUtilsTest {
         SessionContext context = new SessionContext();
         Headers headers = new Headers();
         HttpQueryParams queryParams = new HttpQueryParams();
-        HttpRequestMessage request = new HttpRequestMessageImpl(context, "http", "GET", "/path", queryParams, headers, "127.0.0.1", "scheme", 6666, "server-name");
+        HttpRequestMessage request = new HttpRequestMessageImpl(
+                context, "http", "GET", "/path", queryParams, headers, "127.0.0.1", "scheme", 6666, "server-name");
         request.storeInboundRequest();
         HttpResponseMessage response = new HttpResponseMessageImpl(context, request, 200);
         response.setBodyAsText("Hello world");

@@ -30,7 +30,7 @@ public interface Resolver<T> {
      *            can narrow this down to be nullable.
      * @return the result of a resolver lookup
      */
-    //TODO(argha-c) Param needs to be typed, once the ribbon LB lookup API is figured out.
+    // TODO(argha-c) Param needs to be typed, once the ribbon LB lookup API is figured out.
     T resolve(Object key);
 
     /**
@@ -42,4 +42,6 @@ public interface Resolver<T> {
      * hook to perform activities on shutdown
      */
     void shutdown();
+
+    default void setListener(ResolverListener<T> listener) {}
 }

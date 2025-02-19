@@ -111,7 +111,9 @@ public final class ConnCounter {
 
         dimTags.put("from", lastCountKey != null ? lastCountKey : "nascent");
         lastCountKey = event;
-        Id id = registry.createId(metricBase.name() + '.' + event).withTags(metricBase.tags()).withTags(dimTags);
+        Id id = registry.createId(metricBase.name() + '.' + event)
+                .withTags(metricBase.tags())
+                .withTags(dimTags);
         Gauge gauge = registry.gauge(id);
 
         synchronized (getLock(id)) {

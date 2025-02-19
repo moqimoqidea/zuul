@@ -19,7 +19,6 @@ package com.netflix.zuul.groovy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.spy;
 
 import groovy.lang.GroovyObject;
 import org.junit.jupiter.api.Test;
@@ -41,13 +40,13 @@ class GroovyCompilerTest {
         try {
 
             String code = "class test { public String hello(){return \"hello\" } } ";
-            Class clazz = compiler.compile(code,"test");
+            Class clazz = compiler.compile(code, "test");
             assertNotNull(clazz);
-            assertEquals("test",clazz.getName());
+            assertEquals("test", clazz.getName());
             GroovyObject groovyObject = (GroovyObject) clazz.newInstance();
             Object[] args = {};
-            String s = (String) groovyObject.invokeMethod("hello",args);
-            assertEquals("hello",s);
+            String s = (String) groovyObject.invokeMethod("hello", args);
+            assertEquals("hello", s);
         } catch (Exception e) {
             assertFalse(true);
         }

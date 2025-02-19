@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.netty.handler.ssl.SslProvider;
 import org.junit.jupiter.api.Test;
 
-
 /**
  * Tests for {@link BaseSslContextFactory}.
  */

@@ -15,7 +15,9 @@
  */
 package com.netflix.zuul;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +29,6 @@ import com.netflix.zuul.filters.ZuulFilter;
 import com.netflix.zuul.message.ZuulMessage;
 import java.io.File;
 import java.util.Collection;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -50,8 +51,7 @@ class DynamicFilterLoaderTest {
     private final TestZuulFilter filter = new TestZuulFilter();
 
     @BeforeEach
-    void before() throws Exception
-    {
+    void before() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         loader = new DynamicFilterLoader(registry, compiler, filterFactory);
@@ -70,7 +70,7 @@ class DynamicFilterLoaderTest {
 
     @Test
     void testPutFiltersForClasses() throws Exception {
-        loader.putFiltersForClasses(new String[]{TestZuulFilter.class.getName()});
+        loader.putFiltersForClasses(new String[] {TestZuulFilter.class.getName()});
 
         Collection<ZuulFilter<?, ?>> filters = registry.getAllFilters();
         assertEquals(1, filters.size());
@@ -80,9 +80,8 @@ class DynamicFilterLoaderTest {
     void testPutFiltersForClassesException() throws Exception {
         Exception caught = null;
         try {
-            loader.putFiltersForClasses(new String[]{"asdf"});
-        }
-        catch (ClassNotFoundException e) {
+            loader.putFiltersForClasses(new String[] {"asdf"});
+        } catch (ClassNotFoundException e) {
             caught = e;
         }
         assertTrue(caught != null);
@@ -113,7 +112,7 @@ class DynamicFilterLoaderTest {
 
         assertNotNull(filter);
         assertEquals(TestZuulFilter.class, filter.getClass());
-//            assertTrue(loader.filterInstanceMapSize() == 1);
+        //            assertTrue(loader.filterInstanceMapSize() == 1);
     }
 
     private static final class TestZuulFilter extends BaseSyncFilter {

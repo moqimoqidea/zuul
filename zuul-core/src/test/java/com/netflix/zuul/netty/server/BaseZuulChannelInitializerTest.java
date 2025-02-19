@@ -53,8 +53,7 @@ class BaseZuulChannelInitializerTest {
                 new BaseZuulChannelInitializer("1234", channelConfig, channelDependencies, channelGroup) {
 
                     @Override
-                    protected void initChannel(Channel ch) {
-                    }
+                    protected void initChannel(Channel ch) {}
                 };
         EmbeddedChannel channel = new EmbeddedChannel();
 
@@ -81,8 +80,7 @@ class BaseZuulChannelInitializerTest {
                 new BaseZuulChannelInitializer("1234", channelConfig, channelDependencies, channelGroup) {
 
                     @Override
-                    protected void initChannel(Channel ch) {
-                    }
+                    protected void initChannel(Channel ch) {}
                 };
         EmbeddedChannel channel = new EmbeddedChannel();
 
@@ -109,8 +107,7 @@ class BaseZuulChannelInitializerTest {
                 new BaseZuulChannelInitializer("1234", channelConfig, channelDependencies, channelGroup) {
 
                     @Override
-                    protected void initChannel(Channel ch) {
-                    }
+                    protected void initChannel(Channel ch) {}
                 };
         EmbeddedChannel channel = new EmbeddedChannel();
 
@@ -118,6 +115,5 @@ class BaseZuulChannelInitializerTest {
 
         assertNotNull(channel.pipeline().context(ServerStateHandler.InboundHandler.class));
         assertNotNull(channel.pipeline().context(ServerStateHandler.OutboundHandler.class));
-
     }
 }

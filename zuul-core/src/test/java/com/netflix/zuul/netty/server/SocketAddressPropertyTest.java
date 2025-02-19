@@ -16,13 +16,10 @@
 
 package com.netflix.zuul.netty.server;
 
-import static com.netflix.zuul.netty.server.SocketAddressProperty.BindType.ANY;
-import static com.netflix.zuul.netty.server.SocketAddressProperty.BindType.ANY_LOCAL;
-import static com.netflix.zuul.netty.server.SocketAddressProperty.BindType.IPV4_ANY;
-import static com.netflix.zuul.netty.server.SocketAddressProperty.BindType.IPV4_LOCAL;
-import static com.netflix.zuul.netty.server.SocketAddressProperty.BindType.IPV6_ANY;
-import static com.netflix.zuul.netty.server.SocketAddressProperty.BindType.IPV6_LOCAL;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.netflix.zuul.netty.server.SocketAddressProperty.BindType;
 import io.netty.channel.unix.DomainSocketAddress;
@@ -152,11 +149,25 @@ class SocketAddressPropertyTest {
 
     @Test
     void failsOnBadPort() {
-        for (BindType type : Arrays.asList(ANY, IPV4_ANY, IPV6_ANY, ANY_LOCAL, IPV4_LOCAL, IPV6_LOCAL)) {
+        for (BindType type : Arrays.asList(
+                BindType.ANY,
+                BindType.IPV4_ANY,
+                BindType.IPV6_ANY,
+                BindType.ANY_LOCAL,
+                BindType.IPV4_LOCAL,
+                BindType.IPV6_LOCAL)) {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
                 SocketAddressProperty.Decoder.INSTANCE.apply(type.name() + "=bogus");
             });
             assertTrue(exception.getMessage().contains("Port"));
         }
+    }
+
+    @Test
+    public void failsOnBadAddress() throws Exception {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            SocketAddressProperty.Decoder.INSTANCE.apply("");
+        });
+        assertEquals("Invalid address", exception.getMessage());
     }
 }

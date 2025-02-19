@@ -29,7 +29,8 @@ class GuiceFilterFactoryIntegTest extends BaseInjectionIntegTest {
 
     @Test
     void ctorInjection() throws Exception {
-        TestGuiceConstructorFilter filter = (TestGuiceConstructorFilter) filterFactory.newInstance(TestGuiceConstructorFilter.class);
+        TestGuiceConstructorFilter filter =
+                (TestGuiceConstructorFilter) filterFactory.newInstance(TestGuiceConstructorFilter.class);
 
         assertNotNull(filter.injector);
     }
@@ -40,5 +41,4 @@ class GuiceFilterFactoryIntegTest extends BaseInjectionIntegTest {
 
         assertNotNull(filter.injector);
     }
-
 }

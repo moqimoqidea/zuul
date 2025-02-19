@@ -20,9 +20,6 @@ import com.netflix.zuul.message.ZuulMessage;
 import io.netty.handler.codec.http.HttpContent;
 import rx.Observable;
 
-import static com.netflix.zuul.filters.FilterSyncType.SYNC;
-import static com.netflix.zuul.filters.FilterType.ENDPOINT;
-
 /**
  * Base class to help implement SyncZuulFilter. Note that the class BaseSyncFilter does exist but it derives from
  * BaseFilter which in turn creates a new instance of CachedDynamicBooleanProperty for "filterDisabled" every time you
@@ -38,7 +35,8 @@ import static com.netflix.zuul.filters.FilterType.ENDPOINT;
  * TL;DR use this as a base class for your ZuulFilter if you intend to create new instances of ZuulFilter
  * Created by saroskar on 6/8/17.
  */
-public abstract class SyncZuulFilterAdapter<I extends ZuulMessage, O extends ZuulMessage> implements SyncZuulFilter<I, O> {
+public abstract class SyncZuulFilterAdapter<I extends ZuulMessage, O extends ZuulMessage>
+        implements SyncZuulFilter<I, O> {
 
     @Override
     public boolean isDisabled() {
@@ -58,7 +56,7 @@ public abstract class SyncZuulFilterAdapter<I extends ZuulMessage, O extends Zuu
 
     @Override
     public FilterType filterType() {
-        return ENDPOINT;
+        return FilterType.ENDPOINT;
     }
 
     @Override
@@ -73,7 +71,7 @@ public abstract class SyncZuulFilterAdapter<I extends ZuulMessage, O extends Zuu
 
     @Override
     public FilterSyncType getSyncType() {
-        return SYNC;
+        return FilterSyncType.SYNC;
     }
 
     @Override
@@ -88,11 +86,11 @@ public abstract class SyncZuulFilterAdapter<I extends ZuulMessage, O extends Zuu
 
     @Override
     public void incrementConcurrency() {
-        //NOOP for sync filters
+        // NOOP for sync filters
     }
 
     @Override
     public void decrementConcurrency() {
-        //NOOP for sync filters
+        // NOOP for sync filters
     }
 }

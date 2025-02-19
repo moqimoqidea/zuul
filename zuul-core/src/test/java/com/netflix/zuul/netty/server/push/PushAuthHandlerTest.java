@@ -16,6 +16,9 @@
 
 package com.netflix.zuul.netty.server.push;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
@@ -25,16 +28,13 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 class PushAuthHandlerTest {
     @Test
     void testIsInvalidOrigin() {
         ZuulPushAuthHandlerTest authHandler = new ZuulPushAuthHandlerTest();
 
-        final DefaultFullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST,
-                "/ws", Unpooled.buffer());
+        final DefaultFullHttpRequest request =
+                new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/ws", Unpooled.buffer());
 
         // Invalid input
         assertTrue(authHandler.isInvalidOrigin(request));
@@ -58,7 +58,7 @@ class PushAuthHandlerTest {
         }
 
         @Override
-        protected PushUserAuth doAuth(FullHttpRequest req) {
+        protected PushUserAuth doAuth(FullHttpRequest req, ChannelHandlerContext ctx) {
             return null;
         }
     }

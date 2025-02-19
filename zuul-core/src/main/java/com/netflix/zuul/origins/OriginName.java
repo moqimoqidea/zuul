@@ -150,10 +150,9 @@ public final class OriginName {
 
     @Override
     public String toString() {
-        return "OriginName{" +
-                "niwsClientName='" + niwsClientName + '\'' +
-                ", target='" + target + '\'' +
-                ", authority='" + authority + '\'' +
-                '}';
+        return "OriginName{" + "niwsClientName='"
+                + niwsClientName + '\'' + ", target='"
+                + target + '\'' + ", authority='"
+                + authority + '\'' + '}';
     }
 }

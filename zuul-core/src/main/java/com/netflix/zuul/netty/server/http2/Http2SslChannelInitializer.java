@@ -16,8 +16,7 @@
 
 package com.netflix.zuul.netty.server.http2;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.common.base.Preconditions;
 import com.netflix.netty.common.Http2ConnectionCloseHandler;
 import com.netflix.netty.common.Http2ConnectionExpiryHandler;
 import com.netflix.netty.common.SwallowSomeHttp2ExceptionsHandler;
@@ -51,24 +50,19 @@ public final class Http2SslChannelInitializer extends BaseZuulChannelInitializer
     private final SwallowSomeHttp2ExceptionsHandler swallowSomeHttp2ExceptionsHandler;
     private final String metricId;
 
-
     /**
      * Use {@link #Http2SslChannelInitializer(String, ChannelConfig, ChannelConfig, ChannelGroup)} instead.
      */
     @Deprecated
-    public Http2SslChannelInitializer(int port,
-                                      ChannelConfig channelConfig,
-                                      ChannelConfig channelDependencies,
-                                      ChannelGroup channels) {
+    public Http2SslChannelInitializer(
+            int port, ChannelConfig channelConfig, ChannelConfig channelDependencies, ChannelGroup channels) {
         this(String.valueOf(port), channelConfig, channelDependencies, channels);
     }
 
-    public Http2SslChannelInitializer(String metricId,
-                                      ChannelConfig channelConfig,
-                                      ChannelConfig channelDependencies,
-                                      ChannelGroup channels) {
+    public Http2SslChannelInitializer(
+            String metricId, ChannelConfig channelConfig, ChannelConfig channelDependencies, ChannelGroup channels) {
         super(metricId, channelConfig, channelDependencies, channels);
-        this.metricId = checkNotNull(metricId, "metricId");
+        this.metricId = Preconditions.checkNotNull(metricId, "metricId");
 
         this.swallowSomeHttp2ExceptionsHandler = new SwallowSomeHttp2ExceptionsHandler(registry);
 
@@ -84,18 +78,26 @@ public final class Http2SslChannelInitializer extends BaseZuulChannelInitializer
         SslHandler sslHandler = sslContext.newHandler(ch.alloc());
         sslHandler.engine().setEnabledProtocols(serverSslConfig.getProtocols());
 
-//        SSLParameters sslParameters = new SSLParameters();
-//        AlgorithmConstraints algoConstraints = new AlgorithmConstraints();
-//        sslParameters.setAlgorithmConstraints(algoConstraints);
-//        sslParameters.setUseCipherSuitesOrder(true);
-//        sslHandler.engine().setSSLParameters(sslParameters);
+        //        SSLParameters sslParameters = new SSLParameters();
+        //        AlgorithmConstraints algoConstraints = new AlgorithmConstraints();
+        //        sslParameters.setAlgorithmConstraints(algoConstraints);
+        //        sslParameters.setUseCipherSuitesOrder(true);
+        //        sslHandler.engine().setSSLParameters(sslParameters);
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("ssl protocols supported: {}", String.join(", ", sslHandler.engine().getSupportedProtocols()));
-            LOG.debug("ssl protocols enabled: {}", String.join(", ", sslHandler.engine().getEnabledProtocols()));
+            LOG.debug(
+                    "ssl protocols supported: {}",
+                    String.join(", ", sslHandler.engine().getSupportedProtocols()));
+            LOG.debug(
+                    "ssl protocols enabled: {}",
+                    String.join(", ", sslHandler.engine().getEnabledProtocols()));
 
-            LOG.debug("ssl ciphers supported: {}", String.join(", ", sslHandler.engine().getSupportedCipherSuites()));
-            LOG.debug("ssl ciphers enabled: {}", String.join(", ", sslHandler.engine().getEnabledCipherSuites()));
+            LOG.debug(
+                    "ssl ciphers supported: {}",
+                    String.join(", ", sslHandler.engine().getSupportedCipherSuites()));
+            LOG.debug(
+                    "ssl ciphers enabled: {}",
+                    String.join(", ", sslHandler.engine().getEnabledCipherSuites()));
         }
 
         // Configure our pipeline of ChannelHandlerS.
@@ -111,18 +113,26 @@ public final class Http2SslChannelInitializer extends BaseZuulChannelInitializer
         addSslClientCertChecks(pipeline);
 
         Http2MetricsChannelHandlers http2MetricsChannelHandlers =
-                new Http2MetricsChannelHandlers(registry,"server", "http2-" + metricId);
+                new Http2MetricsChannelHandlers(registry, "server", "http2-" + metricId);
 
         Http2ConnectionCloseHandler connectionCloseHandler = new Http2ConnectionCloseHandler(registry);
-        Http2ConnectionExpiryHandler connectionExpiryHandler = new Http2ConnectionExpiryHandler(maxRequestsPerConnection, maxRequestsPerConnectionInBrownout, connectionExpiry);
+        Http2ConnectionExpiryHandler connectionExpiryHandler = new Http2ConnectionExpiryHandler(
+                maxRequestsPerConnection, maxRequestsPerConnectionInBrownout, connectionExpiry);
 
-        pipeline.addLast("http2CodecSwapper", new Http2OrHttpHandler(
-                new Http2StreamInitializer(ch, this::http1Handlers, http2MetricsChannelHandlers, connectionCloseHandler, connectionExpiryHandler),
-                channelConfig,
-                cp -> {
-                    http1Codec(cp);
-                    http1Handlers(cp);
-                }));
+        pipeline.addLast(
+                "http2CodecSwapper",
+                new Http2OrHttpHandler(
+                        new Http2StreamInitializer(
+                                ch,
+                                this::http1Handlers,
+                                http2MetricsChannelHandlers,
+                                connectionCloseHandler,
+                                connectionExpiryHandler),
+                        channelConfig,
+                        cp -> {
+                            http1Codec(cp);
+                            http1Handlers(cp);
+                        }));
         pipeline.addLast("codec_placeholder", DUMMY_HANDLER);
 
         pipeline.addLast(swallowSomeHttp2ExceptionsHandler);
@@ -137,4 +147,3 @@ public final class Http2SslChannelInitializer extends BaseZuulChannelInitializer
         pipeline.replace("codec_placeholder", HTTP_CODEC_HANDLER_NAME, createHttpServerCodec());
     }
 }
-

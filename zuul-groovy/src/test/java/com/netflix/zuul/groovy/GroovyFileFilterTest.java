@@ -32,7 +32,7 @@ class GroovyFileFilterTest {
 
         GroovyFileFilter filter = new GroovyFileFilter();
 
-        assertFalse(filter.accept(new File("/"),"file.mikey"));
-        assertTrue(filter.accept(new File("/"),"file.groovy"));
+        assertFalse(filter.accept(new File("/"), "file.mikey"));
+        assertTrue(filter.accept(new File("/"), "file.groovy"));
     }
 }

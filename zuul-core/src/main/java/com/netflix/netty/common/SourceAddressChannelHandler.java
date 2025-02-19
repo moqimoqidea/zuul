@@ -23,13 +23,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.AttributeKey;
 
+import javax.annotation.Nullable;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
-import javax.annotation.Nullable;
 
 /**
  * Stores the source IP address as an attribute of the channel. This has the advantage of allowing us to overwrite it if
@@ -100,10 +100,7 @@ public final class SourceAddressChannelHandler extends ChannelInboundHandlerAdap
     /**
      * The port number of the local socket, or {@code -1} if not appropriate.  This is not overwritten by the Proxy
      * Protocol message if present.
-     *
-     * @deprecated Use {@code channel.localAddress()}  instead.
      */
-    @Deprecated
     public static final AttributeKey<Integer> ATTR_SERVER_LOCAL_PORT = AttributeKey.newInstance("_server_local_port");
 
     @Override
@@ -118,7 +115,9 @@ public final class SourceAddressChannelHandler extends ChannelInboundHandlerAdap
         ctx.channel().attr(ATTR_LOCAL_ADDRESS).setIfAbsent(getHostAddress(localAddress));
         // ATTR_LOCAL_ADDRESS and ATTR_LOCAL_PORT get overwritten with what is received in
         // Proxy Protocol (via the LB), so set local server's address, port explicitly
-        ctx.channel().attr(ATTR_SERVER_LOCAL_ADDRESS).setIfAbsent(localAddress.getAddress().getHostAddress());
+        ctx.channel()
+                .attr(ATTR_SERVER_LOCAL_ADDRESS)
+                .setIfAbsent(localAddress.getAddress().getHostAddress());
         ctx.channel().attr(ATTR_SERVER_LOCAL_PORT).setIfAbsent(localAddress.getPort());
 
         super.channelActive(ctx);

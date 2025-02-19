@@ -20,8 +20,9 @@ package com.netflix.zuul;
  * Categorization of filters.
  */
 public enum FilterCategory {
-
-    ABUSE("abuse", "Abuse detection and protection filters, such as rate-limiting, malicious request detection, geo-blocking"),
+    ABUSE(
+            "abuse",
+            "Abuse detection and protection filters, such as rate-limiting, malicious request detection, geo-blocking"),
     ACCESS("access", "Authentication and authorization filters"),
     ADMIN("admin", "Admin only filters providing operational support"),
     CHAOS("chaos", "Failure injection testing and resilience support"),
@@ -32,8 +33,9 @@ public enum FilterCategory {
     OBSERVABILITY("observability", "Filters providing observability features"),
     OVERLOAD("overload", "Filters to respond on the server being in an overloaded state such as brownout"),
     ROUTING("routing", "Filters which make routing decisions"),
+    UNSPECIFIED("unspecified", "Default category when no category is specified"),
     ;
-    
+
     private final String code;
     private final String description;
 

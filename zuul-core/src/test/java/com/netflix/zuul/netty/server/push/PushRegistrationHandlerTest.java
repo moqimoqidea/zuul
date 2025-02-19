@@ -15,12 +15,16 @@
  */
 package com.netflix.zuul.netty.server.push;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+
 import com.google.common.util.concurrent.MoreExecutors;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -191,7 +195,6 @@ class PushRegistrationHandlerTest {
         verify(channelFuture).addListener(ChannelFutureListener.CLOSE);
     }
 
-
     private static class TestAuth implements PushUserAuth {
 
         private final boolean success;
@@ -215,5 +218,4 @@ class PushRegistrationHandlerTest {
             return "whatever";
         }
     }
-
 }

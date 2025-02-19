@@ -15,10 +15,11 @@
  */
 package com.netflix.zuul.util;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
 
 /**
  * Utility for generating JSON from Maps/Lists
@@ -79,7 +80,6 @@ public class JsonUtility {
             logger.error("Could not create JSON from Map. ", e);
             return "{}";
         }
-
     }
 
     /*
@@ -137,15 +137,14 @@ public class JsonUtility {
             return this;
         }
 
+        @Override
         public String toString() {
             return json.toString();
         }
-
     }
 
     public static interface JsonCapableObject {
 
         public Map<String, Object> jsonMap();
-
     }
 }

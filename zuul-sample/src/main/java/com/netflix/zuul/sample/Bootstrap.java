@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Bootstrap
- *
+ * <p>
  * Author: Arthur Gonigberg
  * Date: November 20, 2017
  */
@@ -62,8 +62,7 @@ public class Bootstrap {
             System.err.println("Zuul Sample: initialization failed. Forcing shutdown now.");
             System.err.println("###############");
             exitCode = 1;
-        }
-        finally {
+        } finally {
             // server shutdown
             if (server != null) {
                 server.stop();

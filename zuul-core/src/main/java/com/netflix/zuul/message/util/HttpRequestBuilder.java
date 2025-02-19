@@ -86,7 +86,7 @@ public final class HttpRequestBuilder {
     }
 
     public HttpRequestBuilder withQueryParams(HttpQueryParams requestParams) {
-        this.queryParams =  Objects.requireNonNull(requestParams);
+        this.queryParams = Objects.requireNonNull(requestParams);
         return this;
     }
 
@@ -100,8 +100,13 @@ public final class HttpRequestBuilder {
         return this;
     }
 
+    public HttpRequestBuilder withPort(int port) {
+        this.port = port;
+        return this;
+    }
+
     /**
-     * Used to build a request with overriden values
+     * Used to build a request with overridden values
      *
      * @return `HttpRequestMessage`
      */
@@ -110,7 +115,7 @@ public final class HttpRequestBuilder {
             throw new IllegalStateException("Builder must only be invoked once!");
         }
         isBuilt = true;
-        return new HttpRequestMessageImpl(sessionContext, protocol, method, path, queryParams, headers, clientIp, scheme, port,
-                serverName);
+        return new HttpRequestMessageImpl(
+                sessionContext, protocol, method, path, queryParams, headers, clientIp, scheme, port, serverName);
     }
 }

@@ -16,7 +16,6 @@
 
 package com.netflix.netty.common;
 
-import static com.netflix.netty.common.HttpLifecycleChannelHandler.ATTR_HTTP_PIPELINE_REJECT;
 import com.google.common.truth.Truth;
 import com.netflix.netty.common.HttpLifecycleChannelHandler.CompleteEvent;
 import com.netflix.netty.common.HttpLifecycleChannelHandler.CompleteReason;
@@ -43,7 +42,7 @@ class HttpServerLifecycleChannelHandlerTest {
 
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-            assert evt instanceof CompleteEvent;
+            Truth.assertThat(evt).isInstanceOf(CompleteEvent.class);
             this.completeEvent = (CompleteEvent) evt;
         }
 
@@ -61,7 +60,7 @@ class HttpServerLifecycleChannelHandlerTest {
 
         channel.attr(HttpLifecycleChannelHandler.ATTR_STATE).set(State.STARTED);
         // emulate pipeline rejection
-        channel.attr(ATTR_HTTP_PIPELINE_REJECT).set(Boolean.TRUE);
+        channel.attr(HttpLifecycleChannelHandler.ATTR_HTTP_PIPELINE_REJECT).set(Boolean.TRUE);
         // Fire close
         channel.pipeline().close();
 
@@ -90,12 +89,14 @@ class HttpServerLifecycleChannelHandlerTest {
         ByteBuf buffer = UnpooledByteBufAllocator.DEFAULT.buffer();
         try {
             Truth.assertThat(buffer.refCnt()).isEqualTo(1);
-            FullHttpRequest httpRequest = new DefaultFullHttpRequest(
-                    HttpVersion.HTTP_1_1, HttpMethod.GET, "/whatever", buffer);
+            FullHttpRequest httpRequest =
+                    new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/whatever", buffer);
             channel.attr(HttpLifecycleChannelHandler.ATTR_STATE).set(State.STARTED);
             channel.writeInbound(httpRequest);
 
-            Truth.assertThat(channel.attr(ATTR_HTTP_PIPELINE_REJECT).get()).isEqualTo(Boolean.TRUE);
+            Truth.assertThat(channel.attr(HttpLifecycleChannelHandler.ATTR_HTTP_PIPELINE_REJECT)
+                            .get())
+                    .isEqualTo(Boolean.TRUE);
             Truth.assertThat(buffer.refCnt()).isEqualTo(0);
         } finally {
             if (buffer.refCnt() != 0) {

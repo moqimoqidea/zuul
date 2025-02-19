@@ -81,7 +81,8 @@ class JsonUtilityTest {
         jsonData.put("myNestedData", jsonData2);
 
         String json = JsonUtility.jsonFromMap(jsonData);
-        String expected = "{\"myKey\":\"myValue\",\"myNestedData\":{\"myNestedKey\":\"myNestedValue\",\"myNestedKey2\":\"myNestedValue2\"}}";
+        String expected =
+                "{\"myKey\":\"myValue\",\"myNestedData\":{\"myNestedKey\":\"myNestedValue\",\"myNestedKey2\":\"myNestedValue2\"}}";
 
         assertEquals(expected, json);
     }
@@ -142,7 +143,8 @@ class JsonUtilityTest {
         jsonData.put("myNestedData", jsonData2);
 
         String json = JsonUtility.jsonFromMap(jsonData);
-        String expected = "{\"myKey\":\"myValue\",\"myNumbers\":[1,2,3,4],\"myNestedData\":{\"myNestedKey\":\"myNestedValue\",\"myNestedKey2\":\"myNestedValue2\",\"myStringNumbers\":[\"one\",\"two\",\"three\",\"four\"]}}";
+        String expected =
+                "{\"myKey\":\"myValue\",\"myNumbers\":[1,2,3,4],\"myNestedData\":{\"myNestedKey\":\"myNestedValue\",\"myNestedKey2\":\"myNestedValue2\",\"myStringNumbers\":[\"one\",\"two\",\"three\",\"four\"]}}";
 
         assertEquals(expected, json);
     }
@@ -165,7 +167,8 @@ class JsonUtilityTest {
         jsonData.put("messages", messages);
 
         String json = JsonUtility.jsonFromMap(jsonData);
-        String expected = "{\"messages\":[{\"a\":\"valueA1\",\"b\":\"valueB1\"},{\"a\":\"valueA2\",\"b\":\"valueB2\"}]}";
+        String expected =
+                "{\"messages\":[{\"a\":\"valueA1\",\"b\":\"valueB1\"},{\"a\":\"valueA2\",\"b\":\"valueB2\"}]}";
 
         assertEquals(expected, json);
     }

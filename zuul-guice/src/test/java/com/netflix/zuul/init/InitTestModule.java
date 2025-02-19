@@ -30,5 +30,4 @@ public class InitTestModule extends AbstractModule {
         bind(FilenameFilter.class).toInstance((dir, name) -> false);
         bind(Registry.class).to(NoopRegistry.class);
     }
-
 }

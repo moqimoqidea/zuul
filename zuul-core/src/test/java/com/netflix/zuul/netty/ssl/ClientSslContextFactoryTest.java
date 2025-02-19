@@ -19,16 +19,13 @@ package com.netflix.zuul.netty.ssl;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.netflix.spectator.api.DefaultRegistry;
 import io.netty.handler.ssl.OpenSslClientContext;
 import io.netty.handler.ssl.SslContext;
-import org.junit.jupiter.api.Test;
-
+import java.util.Arrays;
+import java.util.List;
 import javax.net.ssl.SSLSessionContext;
-
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link ClientSslContextFactory}.
@@ -64,7 +61,7 @@ class ClientSslContextFactoryTest {
     @Test
     void testGetProtocols() {
         ClientSslContextFactory factory = new ClientSslContextFactory(new DefaultRegistry());
-        assertThat(factory.getProtocols()).isEqualTo(new String[] { "TLSv1.2" });
+        assertThat(factory.getProtocols()).isEqualTo(new String[] {"TLSv1.2"});
     }
 
     @Test

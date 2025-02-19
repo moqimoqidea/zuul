@@ -47,7 +47,7 @@ import org.apache.commons.configuration.AbstractConfiguration;
 
 /**
  * Zuul Sample Module
- *
+ * <p>
  * Author: Arthur Gonigberg
  * Date: November 20, 2017
  */
@@ -55,9 +55,9 @@ public class ZuulSampleModule extends AbstractModule {
     @Override
     protected void configure() {
         try {
-          ConfigurationManager.loadCascadedPropertiesFromResources("application");
+            ConfigurationManager.loadCascadedPropertiesFromResources("application");
         } catch (Exception ex) {
-          throw new RuntimeException("Error loading configuration: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error loading configuration: " + ex.getMessage(), ex);
         }
 
         bind(AbstractConfiguration.class).toInstance(ConfigurationManager.getConfigInstance());
@@ -78,16 +78,19 @@ public class ZuulSampleModule extends AbstractModule {
         bind(FilterRegistry.class).to(MutableFilterRegistry.class);
         bind(FilterFileManager.class).asEagerSingleton();
 
-
         // general server bindings
         bind(ServerStatusManager.class); // health/discovery status
-        bind(SessionContextDecorator.class).to(ZuulSessionContextDecorator.class); // decorate new sessions when requests come in
+        bind(SessionContextDecorator.class)
+                .to(ZuulSessionContextDecorator.class); // decorate new sessions when requests come in
         bind(Registry.class).to(DefaultRegistry.class); // atlas metrics registry
         bind(RequestCompleteHandler.class).to(BasicRequestCompleteHandler.class); // metrics post-request completion
         bind(RequestMetricsPublisher.class).to(BasicRequestMetricsPublisher.class); // timings publisher
 
         // access logger, including request ID generator
-        bind(AccessLogPublisher.class).toInstance(new AccessLogPublisher("ACCESS",
-                (channel, httpRequest) -> ClientRequestReceiver.getRequestFromChannel(channel).getContext().getUUID()));
+        bind(AccessLogPublisher.class)
+                .toInstance(new AccessLogPublisher(
+                        "ACCESS", (channel, httpRequest) -> ClientRequestReceiver.getRequestFromChannel(channel)
+                        .getContext()
+                        .getUUID()));
     }
 }

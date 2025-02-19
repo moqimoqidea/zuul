@@ -16,10 +16,10 @@
 
 package com.netflix.zuul.discovery;
 
-import static com.netflix.client.config.CommonClientConfigKey.NFLoadBalancerClassName;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
+import com.netflix.client.config.CommonClientConfigKey;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.DynamicServerListLoadBalancer;
 import com.netflix.loadbalancer.Server;
@@ -28,31 +28,58 @@ import com.netflix.zuul.resolver.Resolver;
 import com.netflix.zuul.resolver.ResolverListener;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Argha C
  * @since 2/25/21
- *
+ * <p>
  * Implements a resolver, wrapping a ribbon load-balancer.
  */
 public class DynamicServerResolver implements Resolver<DiscoveryResult> {
 
-    private final DynamicServerListLoadBalancer<?> loadBalancer;
-    ResolverListener<DiscoveryResult> listener;
+    private static final Logger LOG = LoggerFactory.getLogger(DynamicServerResolver.class);
 
+    private final DynamicServerListLoadBalancer<?> loadBalancer;
+    private ResolverListener<DiscoveryResult> listener;
+
+    @Deprecated
     public DynamicServerResolver(IClientConfig clientConfig, ResolverListener<DiscoveryResult> listener) {
         this.loadBalancer = createLoadBalancer(clientConfig);
         this.loadBalancer.addServerListChangeListener(this::onUpdate);
         this.listener = listener;
     }
 
+    public DynamicServerResolver(IClientConfig clientConfig) {
+        this(createLoadBalancer(clientConfig));
+    }
+
+    public DynamicServerResolver(DynamicServerListLoadBalancer<?> loadBalancer) {
+        this.loadBalancer = Objects.requireNonNull(loadBalancer);
+    }
+
+    @Override
+    public void setListener(ResolverListener<DiscoveryResult> listener) {
+        if (this.listener != null) {
+            LOG.warn("Ignoring call to setListener, because a listener was already set");
+            return;
+        }
+
+        this.listener = Objects.requireNonNull(listener);
+        this.loadBalancer.addServerListChangeListener(this::onUpdate);
+    }
+
     @Override
     public DiscoveryResult resolve(@Nullable Object key) {
         final Server server = loadBalancer.chooseServer(key);
-        return server!= null ? new DiscoveryResult((DiscoveryEnabledServer) server, loadBalancer.getLoadBalancerStats()) : DiscoveryResult.EMPTY;
+        return server != null
+                ? new DiscoveryResult((DiscoveryEnabledServer) server, loadBalancer.getLoadBalancerStats())
+                : DiscoveryResult.EMPTY;
     }
 
     @Override
@@ -65,17 +92,20 @@ public class DynamicServerResolver implements Resolver<DiscoveryResult> {
         loadBalancer.shutdown();
     }
 
-    private DynamicServerListLoadBalancer<?> createLoadBalancer(IClientConfig clientConfig) {
-        //TODO(argha-c): Revisit this style of LB initialization post modularization. Ideally the LB should be pluggable.
+    private static DynamicServerListLoadBalancer<?> createLoadBalancer(IClientConfig clientConfig) {
+        // TODO(argha-c): Revisit this style of LB initialization post modularization. Ideally the LB should be
+        // pluggable.
 
         // Use a hard coded string for the LB default name to avoid a dependency on Ribbon classes.
-        String loadBalancerClassName =
-                clientConfig.get(NFLoadBalancerClassName, "com.netflix.loadbalancer.ZoneAwareLoadBalancer");
+        String loadBalancerClassName = clientConfig.get(
+                CommonClientConfigKey.NFLoadBalancerClassName, "com.netflix.loadbalancer.ZoneAwareLoadBalancer");
 
         DynamicServerListLoadBalancer<?> lb;
         try {
             Class<?> clazz = Class.forName(loadBalancerClassName);
-            lb = clazz.asSubclass(DynamicServerListLoadBalancer.class).getConstructor().newInstance();
+            lb = clazz.asSubclass(DynamicServerListLoadBalancer.class)
+                    .getConstructor()
+                    .newInstance();
             lb.initWithNiwsConfig(clientConfig);
         } catch (Exception e) {
             Throwables.throwIfUnchecked(e);
@@ -90,7 +120,8 @@ public class DynamicServerResolver implements Resolver<DiscoveryResult> {
         Set<Server> oldSet = new HashSet<>(oldList);
         Set<Server> newSet = new HashSet<>(newList);
         final List<DiscoveryResult> discoveryResults = Sets.difference(oldSet, newSet).stream()
-                .map(server -> new DiscoveryResult((DiscoveryEnabledServer) server, loadBalancer.getLoadBalancerStats()))
+                .map(server ->
+                        new DiscoveryResult((DiscoveryEnabledServer) server, loadBalancer.getLoadBalancerStats()))
                 .collect(Collectors.toList());
         listener.onChange(discoveryResults);
     }

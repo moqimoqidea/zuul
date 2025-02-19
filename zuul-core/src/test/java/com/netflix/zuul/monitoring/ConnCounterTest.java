@@ -67,7 +67,6 @@ class ConnCounterTest {
         ConnCounter.from(channel).increment("active");
         ConnCounter.from(channel).increment("active");
 
-
         assertEquals(1, ConnCounter.from(channel).getCurrentActiveConns(), 0);
     }
 }

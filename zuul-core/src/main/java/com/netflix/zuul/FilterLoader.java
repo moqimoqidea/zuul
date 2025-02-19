@@ -15,13 +15,12 @@
  */
 package com.netflix.zuul;
 
-import static java.util.Objects.requireNonNull;
-
 import com.netflix.zuul.filters.FilterType;
 import com.netflix.zuul.filters.ZuulFilter;
 import java.io.File;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.SortedSet;
 
 /**
@@ -48,7 +47,6 @@ public interface FilterLoader {
      */
     List<ZuulFilter<?, ?>> putFiltersForClasses(String[] classNames) throws Exception;
 
-
     ZuulFilter<?, ?> putFilterForClassName(String className) throws Exception;
 
     /**
@@ -63,6 +61,7 @@ public interface FilterLoader {
 
     Comparator<Class<? extends ZuulFilter<?, ?>>> FILTER_CLASS_COMPARATOR =
             Comparator.<Class<? extends ZuulFilter<?, ?>>>comparingInt(
-                    c ->  requireNonNull(c.getAnnotation(Filter.class), () -> "missing annotation: " + c).order())
+                            c -> Objects.requireNonNull(c.getAnnotation(Filter.class), () -> "missing annotation: " + c)
+                                    .order())
                     .thenComparing(Class::getName);
 }

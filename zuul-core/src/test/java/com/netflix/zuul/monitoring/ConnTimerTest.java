@@ -41,18 +41,15 @@ class ConnTimerTest {
         Attrs.newKey("bar").put(attrs, "baz");
         timer.record(4000L, "end");
 
-        PercentileTimer meter1 =
-                PercentileTimer.get(registry, registry.createId("foo.start-middle"));
+        PercentileTimer meter1 = PercentileTimer.get(registry, registry.createId("foo.start-middle"));
         assertNotNull(meter1);
         assertEquals(1000L, meter1.totalTime());
 
-        PercentileTimer meter2 =
-                PercentileTimer.get(registry, registry.createId("foo.middle-end", "bar", "baz"));
+        PercentileTimer meter2 = PercentileTimer.get(registry, registry.createId("foo.middle-end", "bar", "baz"));
         assertNotNull(meter2);
         assertEquals(2000L, meter2.totalTime());
 
-        PercentileTimer meter3 =
-                PercentileTimer.get(registry, registry.createId("foo.start-end", "bar", "baz"));
+        PercentileTimer meter3 = PercentileTimer.get(registry, registry.createId("foo.start-end", "bar", "baz"));
         assertNotNull(meter3);
         assertEquals(3000L, meter3.totalTime());
     }
